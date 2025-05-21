@@ -1,3 +1,6 @@
 Directory,File Name,Purpose
-code,01-RPr-Chakraborty.Rmd,Rmarkdown reproduction of the study. Run this!
+code,01-RPr-Chakraborty.Rmd,"Rmarkdown of published, detailed reproduction of the study by Holler et al.."
 code,Scratch-Code.Rmd,Miscellaneous R code that is not used in the final reproduction study
+code,01-R-markdown.Rmd,Rmarkdown of reproduction study produced by Matthew Mills in this repository
+environment,r-environment-2025-03-03.txt,stores versions of packages used in the study
+,Mills0361_Chakraborty.workflow.pdf,workflow of analysis plan mapping out study design

@@ -1,6 +1,6 @@
 ---
-title: "Analysis"
-author: "HEGSRR"
+title: "Reproduction of Chakraborty"
+author: "Matthew Mills"
 date: "`r Sys.Date()`"
 output: html_document
 editor_options:
@@ -23,48 +23,40 @@ You may delete this instruction section.
 
 # Abstract
 
-Write a brief abstract about your research project.
 
-If the project is a reproduction or replication study, include a declaration of the study type with a full reference to the original study.
-For example:
+This study is a *reproduction* of:
 
-This study is a *replication* of:
+> Chakraborty, J.
+> 2021.
+> Social inequities in the distribution of COVID-19: An intra-categorical analysis of people with disabilities in the U.S.
+> *Disability and Health Journal* 14:1-5.
+> <https://doi.org/10.1016/j.dhjo.2020.101007>
 
-> citation to prior study
-
-A graphical abstract of the study could also be included as an image here.
+The original study was published urgently during the initial phases of the COVID-19 pandemic. This reproduction seeks to amend procedures in a reproducible, open source format. Given this context, the reproduction study seeks to determine similar methods to make the study reproducible and to identify possible improvements to the methods. By reproducing Chakraborty's study, this reproduction could hopefully expand access to and stimulate dialogue about the study of social vulnerability as it relates to epidemiology. As contagious disease becomes increasingly prevalent, these types of study methods are critical to refine and share.
 
 # Study metadata
 
-- `Key words`: Comma-separated list of keywords (tags) for searchability. Geographers often use one or two keywords each for: theory, geographic context, and methods.
+- `Key words`: COVID-19, Disability, social vulnerability, cluster-analysis, reproducibility
 - `Subject`: select from the [BePress Taxonomy](http://digitalcommons.bepress.com/cgi/viewcontent.cgi?article=1008&context=reference)
-- `Date created`: date when project was started
-- `Date modified`: date of most recent revision
-- `Spatial Coverage`: Specify the geographic extent of your study. This may be a place name and link to a feature in a gazetteer like GeoNames or OpenStreetMap, or a well known text (WKT) representation of a bounding box.
-- `Spatial Resolution`: Specify the spatial resolution as a scale factor, description of the level of detail of each unit of observation (including administrative level of administrative areas), and/or or distance of a raster GRID size
-- `Spatial Reference System`: Specify the geographic or projected coordinate system for the study, e.g. EPSG:4326
-- `Temporal Coverage`: Specify the temporal extent of your study---i.e. the range of time represented by the data observations.
-- `Temporal Resolution`: Specify the temporal resolution of your study---i.e. the duration of time for which each observation represents or the revisit period for repeated observations
-- `Funding Name`: name of funding for the project
-- `Funding Title`: title of project grant
-- `Award info URI`: web address for award information
-- `Award number`: award number
+- `Date created`: 03-10-2025
+- `Date modified`: 05-20-2025
+- `Spatial Coverage`: Continental United States (lower 48 and Washington DC)
+- `Spatial Resolution`: US County
+- `Spatial Reference System`: Contiguous USA Albers Equal Area projection EPSG:5070
+- `Temporal Coverage`: From 1/22/2020 (when John Hopkins began collecting the data) to 8/1/2020 (when the data was retrieved for the original study)
+- `Temporal Resolution`: rates were calculated off of the whole study period (1 temporal unit)
 
 ## Original study spatio-temporal metadata
 
-- `Spatial Coverage`: extent of original study
-- `Spatial Resolution`: resolution of original study
-- `Spatial Reference System`: spatial reference system of original study
-- `Temporal Coverage`: temporal extent of original study
-- `Temporal Resolution`: temporal resolution of original study
+- `Spatial Coverage`: Continental United States (lower 48 and Washington DC)
+- `Spatial Resolution`: US County
+- `Spatial Reference System`: Contiguous USA Albers Equal Area projection EPSG:5070
+- `Temporal Coverage`: From 1/22/2020 (when John Hopkins began collecting the data) to 8/1/2020 (when the data was retrieved for the original study)
+- `Temporal Resolution`: rates were calculated off of the whole study period (1 temporal unit)
 
 # Study design
 
-Describe how the study relates to prior literature, e.g. is it a **original study**, **meta-analysis study**, **reproduction study**, **reanalysis study**, or **replication study**?
-
-Also describe the original study archetype, e.g. is it **observational**, **experimental**, **quasi-experimental**, or **exploratory**?
-
-Enumerate specific **hypotheses** to be tested or **research questions** to be investigated here, and specify the type of method, statistical test or model to be used on the hypothesis or question.
+This is a **reproduction study** for Chakraborty's 2021 study "Social inequities in the distribution of COVID-19: An intra-categorical analysis of people with disabilities in the U.S." The reproduction seeks to use the `SpatialEpi` package to recalculate the likelihood clusters from the original study using reproducible, open source software. Given differences between the SaTScan software used in the original study and Kuldorff Spatial Scan from the `SpatialEpi` package methods, it is hypothesized that Kuldorff Spatial Scan will be better able to identify clusters around urban corridors and large metropolitan regions with multiple urban centers.
 
 # Materials and procedure
 
@@ -74,7 +66,9 @@ Enumerate specific **hypotheses** to be tested or **research questions** to be i
 # record all the packages you are using here
 # this includes any calls to library(), require(),
 # and double colons such as here::i_am()
-packages <- c("tidyverse", "here")
+packages <- c("tidycensus", "tidyverse", "downloader", "sf", "classInt", "readr",
+  "here", "s2", "pastecs", "tmap", "SpatialEpi", "svDialogs",
+  "geepack", "knitr", "kableExtra", "foreign", "broom", "dotwhisker", "dotenv")
 
 # force all conflicts to become errors
 # if you load dplyr and use filter(), R has to guess whether you mean dplyr::filter() or stats::filter()
@@ -92,7 +86,7 @@ if (!require(groundhog)) {
 
 # this date will be used to determine the versions of R and your packages
 # it is best practice to keep R and its packages up to date
-groundhog.day <- "2023-06-26"
+groundhog.day <- "2025-03-01"
 
 # this replaces any library() or require() calls
 groundhog.library(packages, groundhog.day)
@@ -132,163 +126,1295 @@ Secondary data sources for the study are to include ... .
 
 Each of the next subsections describes one data source.
 
-### Primary data source1 name
+## ACS Socio-demographic data
 
-- `Title`: Title of data source
-- `Abstract`: Brief description of the data source
-- `Spatial Coverage`: Specify the geographic extent of your study. This may be a place name and link to a feature in a gazetteer like GeoNames or OpenStreetMap, or a well known text (WKT) representation of a bounding box.
-- `Spatial Resolution`: Specify the spatial resolution as a scale factor, description of the level of detail of each unit of observation (including administrative level of administrative areas), and/or or distance of a raster GRID size
-- `Spatial Representation Type`: Specify the model of spatial data representation, e.g. one of `vector`, `grid`, `textTable`, `tin` (triangulated irregular network), etc. If the type is `vector`, also specify the geometry type as in the OGC Simple Feature Access standard (https://www.ogc.org/publications/standard/sfa/) , e.g. `POINT`, `LINESTRING`, `MULTIPOLYGON`, etc. 
-- `Spatial Reference System`: Specify the geographic or projected coordinate system for the study
-- `Temporal Coverage`: Specify the temporal extent of your study---i.e. the range of time represented by the data observations.
-- `Temporal Resolution`: Specify the temporal resolution of your study---i.e. the duration of time for which each observation represents or the revisit period for repeated observations
-- `Lineage`: Describe and/or cite data sources and/or methodological steps planned to create this data source.
-  - sampling scheme, including spatial sampling
-  - target sample size and method for determining sample size
-  - stopping criteria for data collection and sampling (e.g. sample size, time elapsed)
-  - de-identification / anonymization
-  - experimental manipulation
-- `Distribution`: Describe who will make the data available and how?
-- `Constraints`: Legal constraints for *access* or *use* to protect *privacy* or *intellectual property rights*
-- `Data Quality`: State any planned quality assessment
-- `Variables`: For each variable, enter the following information. If you have two or more variables per data source, you may want to present this information in table form (shown below)
-  - `Label`: variable name as used in the data or code
-  - `Alias`: intuitive natural language name
-  - `Definition`: Short description or definition of the variable. Include measurement units in description.
-  - `Type`: data type, e.g. character string, integer, real
-  - `Accuracy`: e.g. uncertainty of measurements
-  - `Domain`: Expected range of Maximum and Minimum of numerical data, or codes or categories of nominal data, or reference to a standard codebook
-  - `Missing Data Value(s)`: Values used to represent missing data and frequency of missing data observations
-  - `Missing Data Frequency`: Frequency of missing data observations: not yet known for data to be collected
+- `Title`: American Community Survey (ACS) five-year estimate (2014-2018)
+- `Abstract`: Demographic breakdown of disabled population
+- `Spatial Coverage`: USA
+- `Spatial Resolution`: County
+- `Spatial Representation Type`: vector multipolygon 
+- `Spatial Reference System`: EPSG 4269
+- `Temporal Coverage`: 2014-2018
+- `Temporal Resolution`: 5-year estimate
+- `Lineage`: Retrieved values from Census website tables S1810 and C18130 tables using tidyCensus
+- `Distribution`: Publicly available
+- `Constraints`: Public Data
 
-| Label | Alias | Definition | Type | Accuracy | Domain | Missing Data Value(s) | Missing Data Frequency |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| variable1 | ... | ... | ... | ... | ... | ... | ... |
-| variable2 | ... | ... | ... | ... | ... | ... | ... |
+The American Community Survey (ACS) five-year estimate (2014-2018) variables used in the study are outlined in the table below.
+Details on ACS data collection can be found at <https://www.census.gov/topics/health/disability/guidance/data-collection-acs.html> and details on sampling methods and accuracy can be found at <https://www.census.gov/programs-surveys/acs/technical-documentation/code-lists.html>.
 
-### Primary data source2 name
+|                            Variable Name in Study                            |                                               ACS Variable name                                                |
+|:----------------------------------:|:----------------------------------:|
+| percent of total civilian non-institutionalized population with a disability |                                                 S1810_C03_001E                                                 |
+|                                   **Race**                                   |                                                                                                                |
+|                      percent w disability: White alone                       |                                                 S1810_C03_004E                                                 |
+|                      percent w disability: Black alone                       |                                                 S1810_C03_005E                                                 |
+|                    percent w disability: Native American                     |                                                 S1810_C03_006E                                                 |
+|                      percent w disability: Asian alone                       |                                                 S1810_C03_007E                                                 |
+|                       percent w disability: Other race                       |                                                 S1810_C03_009E                                                 |
+|                                **Ethnicity**                                 |                                                                                                                |
+|                   percent w disability: Non-Hispanic White                   |                                                S1810_C03_0011E                                                 |
+|                        percent w disability: Hispanic                        |                                                 S1810_C03_012E                                                 |
+|                 percent w disability: Non-Hispanic non-White                 | (S1810_C02_001E - S1810_C02_011E - S1810_C02_012E) / (S1810_C01_001E - S1810_C01_011E - S1810_C01_012E) \* 100 |
+|                       percent w disability: Other race                       |                                                 S1810_C03_009E                                                 |
+|                                 **Poverty**                                  |                                                                                                                |
+|                  percent w disability: Below poverty level                   |                         (C18130_004E + C18130_011E + C18130_018E) / C18130_001E \* 100                         |
+|                  percent w disability: Above poverty level                   |                         (C18130_005E + C18130_012E + C18130_019E) / C18130_001E \* 100                         |
+|                                   **Age**                                    |                                                                                                                |
+|                          percent w disability: 5-17                          |                                                 S1810_C03_014E                                                 |
+|                         percent w disability: 18-34                          |                                                 S1810_C03_015E                                                 |
+|                         percent w disability: 35-64                          |                                                 S1810_C03_016E                                                 |
+|                         percent w disability: 65-74                          |                                                 S1810_C03_017E                                                 |
+|                          percent w disability: 75+                           |                                                 S1810_C03_018E                                                 |
+|                              **Biological sex**                              |                                                                                                                |
+|                          percent w disability: male                          |                                                 S1810_C03_001E                                                 |
+|                         percent w disability: female                         |                                                 S1810_C03_003E                                                 |
 
-... same form as above...  
-Metadata documents in the markdown `.md` format can be included directly with the `includeMarkdown()` function.
-This requires the `markdown` package.
+: Disability Subgroup Variables
 
-### Secondary data source1 name
+American Community Survey (ACS) data for sociodemographic subcategories of people with disabilities can be accessed by using the `tidycensus` package to query the Census API. This requires an API key which can be acquired at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html).
 
-- `Title`: Title of data source
-- `Abstract`: Brief description of the data source
-- `Spatial Coverage`: Specify the geographic extent of your study. This may be a place name and link to a feature in a gazetteer like GeoNames or OpenStreetMap, or a well known text (WKT) representation of a bounding box.
-- `Spatial Resolution`: Specify the spatial resolution as a scale factor, description of the level of detail of each unit of observation (including administrative level of administrative areas), and/or or distance of a raster GRID size
-- `Spatial Reference System`: Specify the geographic or projected coordinate system for the study
-- `Temporal Coverage`: Specify the temporal extent of your study---i.e. the range of time represented by the data observations.
-- `Temporal Resolution`: Specify the temporal resolution of your study---i.e. the duration of time for which each observation represents or the revisit period for repeated observations
-- `Lineage`: Describe and/or cite data sources and/or methodological steps used to create this data source
-- `Distribution`: Describe how the data is distributed, including any persistent identifier (e.g. DOI) or URL for data access
-- `Constraints`: Legal constraints for *access* or *use* to protect *privacy* or *intellectual property rights*
-- `Data Quality`: State result of quality assessment or state "Quality unknown"
-- `Variables`: For each variable, enter the following information. If you have two or more variables per data source, you may want to present this information in table form (shown below)
-  - `Label`: variable name as used in the data or code
-  - `Alias`: intuitive natural language name
-  - `Definition`: Short description or definition of the variable. Include measurement units in description.
-  - `Type`: data type, e.g. character string, integer, real
-  - `Accuracy`: e.g. uncertainty of measurements
-  - `Domain`: Range (Maximum and Minimum) of numerical data, or codes or categories of nominal data, or reference to a standard codebook
-  - `Missing Data Value(s)`: Values used to represent missing data and frequency of missing data observations
-  - `Missing Data Frequency`: Frequency of missing data observations
+```{r}
+conflicts_prefer(dplyr::filter)
 
-| Label | Alias | Definition | Type | Accuracy | Domain | Missing Data Value(s) | Missing Data Frequency |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| variable1 | ... | ... | ... | ... | ... | ... | ... |
-| variable2 | ... | ... | ... | ... | ... | ... | ... |
+acs_subject_vars <- load_variables(2018, "acs5/subject")
+acs_vars_S1810 <- acs_subject_vars |> filter(str_detect(name, "S1810"))
+write_csv(acs_vars_S1810, here("data", "metadata", "acs_S1810_vars.csv"))
 
-### Secondary data source2 name
+acs_vars <- load_variables(2018, "acs5")
+acs_vars_C18130 <- acs_vars |> filter(str_detect(name, "C18130"))
+write_csv(acs_vars_C18130, here("data", "metadata", "acs_C18130_vars.csv"))
+```
 
-... same form as above...
+
+```{r API-Load-ACS, eval=FALSE}
+# If you wish to use a census API key, run the census_api_key() function in the console
+
+# Query disability demographic data with geographic boundaries
+acs <- get_acs(
+  geography = "county",
+  table = "S1810",
+  year = 2018,
+  output = "wide",
+  cache_table = TRUE,
+  geometry = TRUE,
+  keep_geo_vars = TRUE
+)
+
+# Query poverty and disability data
+acs_pov <- get_acs(
+  geography = "county",
+  table = "C18130",
+  year = 2018,
+  output = "wide",
+  cache_table = TRUE
+)
+
+# Query state geographic data
+state <- get_acs(
+  geography = "state",
+  year = 2018,
+  variables = c("B01001_001"),
+  geometry = TRUE,
+  keep_geo_vars = TRUE
+)
+
+# Save query results
+saveRDS(acs, here("data", "raw", "public", "acs.RDS"))
+saveRDS(acs_pov, here("data", "raw", "public", "acs_pov.RDS"))
+saveRDS(state, here("data", "raw", "public", "state.RDS"))
+```
+
+```{r load-acs}
+acs <- readRDS(here("data", "raw", "public", "acs.RDS"))
+acs_pov <- readRDS(here("data", "raw", "public", "acs_pov.RDS"))
+state <- readRDS(here("data", "raw", "public", "state.RDS"))
+```
+
+### COVID-19 data
+
+Data on COVID-19 cases from the Johns Hopkins University dashboard have been provided directly with the research compendium because the data is no longer available online in the state in which it was downloaded on August 1, 2020.
+The dashboard and cumulative counts of COVID-19 cases and deaths were continually updated, so an exact reproduction required communication with the original author, Jayajit Chakraborty, for assistance with provision of data from August 1, 2020.
+The data includes an estimate of the total population (`POP_ESTIMA`) and confirmed COVID-19 cases (`Confirmed`).
+The COVID-19 case data expresses cumulative count of reported COVID-19 from 1/22/2020 to 8/1/2020.
+Although metadata for this particular resource is no longer available from the original source, one can reasonably assume that the total population estimate was based on the 2014-2018 5-year ACS estimate, as the 2019 estimates data had not been released yet.
+
+Versions of the data can be found at the John Hopkins CCSE COVID-19 Data Repository (<https://github.com/CSSEGISandData/COVID-19>).
+However, archived data only provides summaries at the national scale.
+We received the COVID-19 case data through 8/1/2020 at the county level from the author, as there is no readily apparent way to access archived data from the Johns Hopkins University Center for Systems Science Engineering database.
+
+```{r load-covid-data}
+covid <- read_sf(here("data", "raw", "public", "covidcase080120.gpkg"))
+
+# select and rename the fips code, population, cases, and x,y coordinates
+covid <- select(covid,
+  fips = FIPS,
+  pop = POP_ESTIMA,
+  cases = Confirmed,
+  x = X, y = Y
+)
+```
 
 ## Prior observations  
 
-Prior experience with the study area, prior data collection, or prior observation of the data can compromise the validity of a study, e.g. through p-hacking.
-Therefore, disclose any prior experience or observations at the time of study pre-registration here, with example text below:
 
-At the time of this study pre-registration, the authors had _____ prior knowledge of the geography of the study region with regards to the ____ phenomena to be studied.
-This study is related to ____ prior studies by the authors
+At the time of this study pre-registration, the authors had no prior knowledge of the geography of the study region with regards to the COVID-19 and social vulnerability phenomena to be studied.
+This study is related to no prior studies by the authors
 
-For each primary data source, declare the extent to which authors had already engaged with the data:
-
-- [ ] no data collection has started
-- [ ] pilot test data has been collected
-- [ ] data collection is in progress and data has not been observed
-- [ ] data collection is in progress and __% of data has been observed
-- [ ] data collection is complete and data has been observed. Explain how authors have already manipulated / explored the data.
-
-For each secondary source, declare the extent to which authors had already engaged with the data:
-
-- [ ] data is not available yet
-- [ ] data is available, but only metadata has been observed
-- [ ] metadata and descriptive statistics have been observed
-- [ ] metadata and a pilot test subset or sample of the full dataset have been observed
-- [ ] the full dataset has been observed. Explain how authors have already manipulated / explored the data.
-
-If pilot test data has been collected or acquired, describe how the researchers observed and analyzed the pilot test, and the extent to which the pilot test influenced the research design.
+The authors have not engaged with any of the data sources prior to the study.
 
 ## Bias and threats to validity
 
-Given the research design and primary data to be collected and/or secondary data to be used, discuss common threats to validity and the approach to mitigating those threats, with an emphasis on geographic threats to validity.
-
-These include:
-  - uneven primary data collection due to geographic inaccessibility or other constraints
-  - multiple hypothesis testing
-  - edge or boundary effects
-  - the modifiable areal unit problem
-  - nonstationarity
-  - spatial dependence or autocorrelation
-  - temporal dependence or autocorrelation
-  - spatial scale dependency
-  - spatial anisotropies
-  - confusion of spatial and a-spatial causation
-  - ecological fallacy
-  - uncertainty e.g. from spatial disaggregation, anonymization, differential privacy
+Method used to factor in spatial autocorrelation may be flawed due to the SaTScan algorithm which generates clusters hierarchically beginning with the cluster with the largest relative risk (RR). By calculating the whole cluster first, it eliminates possible nearby clusters that overlap with the range of the previous cluster. Therefore, a Kuldorff spatial scan will be used to calculate RR likelihood.
 
 ## Data transformations
 
-Describe all data transformations planned to prepare data sources for analysis.
-This section should explain with the fullest detail possible how to transform data from the **raw** state at the time of acquisition or observation, to the pre-processed **derived** state ready for the main analysis.
-Including steps to check and mitigate sources of **bias** and **threats to validity**.
-The method may anticipate **contingencies**, e.g. tests for normality and alternative decisions to make based on the results of the test.
-More specifically, all the **geographic** and **variable** transformations required to prepare input data as described in the data and variables section above to match the study's spatio-temporal characteristics as described in the study metadata and study design sections.
-Visual workflow diagrams may help communicate the methodology in this section.
+### ACS data transformations
 
-Examples of **geographic** transformations include coordinate system transformations, aggregation, disaggregation, spatial interpolation, distance calculations, zonal statistics, etc.
+The original study extent is the lower 48 states and Washington D.C. Therefore, Alaska, Hawai'i and Puerto Rico are removed from the data (workflow step 1).
+Data on people with disabilities in poverty is derived from a different census table (C18130) than data on people with disabilities and age, race, ethnicity, age, and biological sex (S1810).
+Therefore, join the poverty data to the other data using the GEOID (workflow step 3).
+Also transform the ACS geographic data into Contiguous USA Albers Equal Area projection and fix geometry errors.
 
-Examples of **variable** transformations include standardization, normalization, constructed variables, imputation, classification, etc.
+```{r filter-join-acs}
+# Remove Alaska, Hawaii & Puerto Rico,
+# transform coordinate system and fix geometries
+acs <- filter(acs, !STATEFP %in% c("02", "15", "72")) %>%
+  st_transform(5070) %>%
+  st_make_valid()
 
-Be sure to include any steps planned to **exclude** observations with *missing* or *outlier* data, to **group** observations by *attribute* or *geographic* criteria, or to **impute** missing data or apply spatial or temporal **interpolation**.
+# Remove Alaska, Hawaii & Puerto Rico,
+state <- filter(state, !STATEFP %in% c("02", "15", "72")) %>%
+  st_transform(5070)
+
+# Join poverty data to disability data
+acs <- left_join(acs, acs_pov, by = "GEOID")
+rm(acs_pov)
+```
+
+Optionally, save the raw ACS data to `data/raw/public/acs.gpkg` for use in GIS software.
+
+```{r save-ACS, message = F, eval = FALSE}
+# Save downloaded acs data to acs.gpkg
+st_write(
+  acs,
+  here("data", "derived", "public", "acs.gpkg"),
+  layer = "acs"
+)
+st_write(
+  state,
+  here("data", "derived", "public", "acs.gpkg"),
+  layer = "state"
+)
+```
+
+Calculate independent socio-demographic variables of people with disabilities as percentages for each sub-category of disability (race, ethnicity, poverty, age, and biological sex) and remove raw census data from the data frame (workflow step 4).
+Reproject the data into an Albers equal area conic projection.
+
+```{r Preprocess-ACS}
+# calculate percentages
+acs_derived <- mutate(acs,
+  dis_pct = S1810_C02_001E / S1810_C01_001E * 100,
+  white_pct = S1810_C02_004E / S1810_C01_001E * 100,
+  black_pct = S1810_C02_005E / S1810_C01_001E * 100,
+  native_pct = S1810_C02_006E / S1810_C01_001E * 100,
+  asian_pct = S1810_C02_007E / S1810_C01_001E * 100,
+  other_pct =
+    (S1810_C02_008E + S1810_C02_009E + S1810_C02_010E) / S1810_C01_001E * 100,
+  non_hisp_white_pct = S1810_C02_011E / S1810_C01_001E * 100,
+  hisp_pct = S1810_C02_012E / S1810_C01_001E * 100,
+  non_hisp_non_white_pct =
+    (S1810_C02_001E - S1810_C02_012E - S1810_C02_011E) / S1810_C01_001E * 100,
+  bpov_pct = (C18130_004E + C18130_011E + C18130_018E) / C18130_001E * 100,
+  apov_pct = (C18130_005E + C18130_012E + C18130_019E) / C18130_001E * 100,
+  pct_5_17 = S1810_C02_014E / S1810_C01_001E * 100,
+  pct_18_34 = S1810_C02_015E / S1810_C01_001E * 100,
+  pct_35_64 = S1810_C02_016E / S1810_C01_001E * 100,
+  pct_65_74 = S1810_C02_017E / S1810_C01_001E * 100,
+  pct_75 = S1810_C02_018E / S1810_C01_001E * 100,
+  male_pct = S1810_C02_002E / S1810_C01_001E * 100,
+  female_pct = S1810_C02_003E / S1810_C01_001E * 100
+)
+
+# select only relevant geographic identifiers and derived percentages
+acs_derived <- acs_derived %>%
+  select(
+    fips = GEOID,
+    statefp = STATEFP,
+    county = NAME.x,
+    county_st = NAME,
+    contains("pct")
+  )
+```
+
+### COVID-19 data transformations
+
+Calculate the COVID incidence rate as the cases per 100,000 people (workflow step 2).
+Convert the COVID data to a non-geographic data frame.
+
+```{r covid-rate}
+covid_table <- covid %>%
+  mutate(covid_rate = round(covid$cases / covid$pop * 100000, 2)) %>%
+  st_drop_geometry()
+```
+
+Join dependent COVID data to independent ACS demographic data.
+
+```{r join-covid-to-acs}
+# Join COVID incidence rate data to acs data
+acs_covid <- acs_derived %>%
+  left_join(covid_table, by = "fips")
+
+# move covid_rate column prior to disability percentages
+acs_covid <- acs_covid %>%
+  select(fips, statefp, county, county_st, covid_rate, everything())
+
+rm(acs, acs_derived, covid)
+```
+
+## Missing data
+
+**Unplanned deviation for reproduction**: There is one county with missing disability and poverty data.
+This was not mentioned in the original study or in our pre-analyis plan.
+However, we replace the missing data with zeros, producing results identical to Chakraborty's.
+
+```{r missing data}
+# county with missing data
+filter(acs_covid, is.na(bpov_pct)) %>% st_drop_geometry() %>% kable()
+
+# replace NA with 0 for missing data
+acs_covid[is.na(acs_covid$bpov_pct), ]$bpov_pct <- 0
+acs_covid[is.na(acs_covid$apov_pct), ]$apov_pct <- 0
+```
+
+## Map COVID-19 incidence
+
+Map the county level distribution of COVID-19 incidence rates, comparing to Figure 1 of the original study.
+
+```{r map-covid-rates, message = FALSE}
+tm_covid_rates <- tm_shape(acs_covid) +
+  tm_polygons("covid_rate",
+    title = "COVID-19 Cases per 100,000 people\n(22 January 2020 to 1 August 2020)",
+    style = "quantile",
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "Oranges",
+  ) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = .5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+tm_covid_rates
+```
+
+## Map disability rates
+
+**Unplanned deviation for reproduction**: We also map the spatial distribution of the percent of people with any disability to improve our understanding of the geographic patterns and relationships of between the overarching independent variable (percentage of people with disability) and the dependent variable (COVID-19 incidence rate).
+
+```{r map-disability-rates, message = FALSE}
+tm_disability_rates <- tm_shape(acs_covid) +
+  tm_polygons("dis_pct",
+    title = "Percent of People with Disability\n(ACS 2014-2018)",
+    style = "quantile",
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "Oranges"
+  ) +
+  tm_shape(state) +
+  tm_borders("grey", lwd = .5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+tm_disability_rates
+```
+
+## Descriptive statistics
+
+Calculate descriptive statistics for dependent COVID-19 rate and independent socio-demographic characteristics, reproducing the min, max, mean, and SD columns of original study table 1.
+
+**Planned deviation for reanalysis**: We also calculate the Shapiro Wilk test for normality.
+
+```{r descriptive-statistics}
+acs_covid_stats <- acs_covid %>%
+  st_drop_geometry() %>%
+  select(covid_rate, contains("pct")) %>%
+  stat.desc(norm = TRUE) %>%
+  round(2) %>%
+  t() %>%
+  as.data.frame() %>%
+  select(min, max, mean, SD = std.dev, ShapiroWilk = normtest.W, p = normtest.p)
+
+acs_covid_stats %>%
+  kable(caption = "Reproduced Descriptive Statistics",
+        align = "c") %>%
+  column_spec(2:6, width_min = "5em") %>%
+  column_spec(7, width_min = "2em") %>%
+  kable_styling(full_width = FALSE)
+```
+
+Compare reproduced descriptive statistics to original descriptive statistics.
+Difference is calculated as 'reproduction study - original study'.
+Identical results will result in zero.
+
+```{r compare-descriptive-stats}
+# load original table 1 results
+table1 <- read.csv(here("data", "raw", "public", "chakraborty", "table1.csv"))
+
+# subtract original results from reproduced results
+(select(acs_covid_stats, min, max, mean, SD) -
+  select(table1, min, max, mean, SD)) %>%
+  kable(caption = "Descriptive Statistics Comparison",
+        align = "c") %>%
+  column_spec(2:5, width = "4em") %>%
+  kable_styling(full_width = FALSE)
+
+rm(acs_covid_stats)
+```
+
+The descriptive statistics are identical, except that the original study seems to have rounded the COVID-19 statistics to zero decimal places.
 
 ## Analysis
 
-Describe the methods of analysis that will directly test the hypotheses or provide results to answer the research questions.
-This section should explicitly define any spatial / statistical *models* and their *parameters*, including *grouping* criteria, *weighting* criteria, and *significance thresholds*.
-Also explain any follow-up analyses or validations.
+## Bivariate parametric correlation analysis
+
+The county-level Pearson's rho correlation coefficient was used to test association between intra-categorical rates of disability and COVID-19 incidence rates.
+As this was a parametric test, normality should be tested.
+A separate hypothesis was formulated for disability in aggregate and for each sociodemographic disability characteristic.
+
+Calculate Pearson's R Correlation Coefficient of each independent variable and the COVID-19 incidence rate, reproducing the Pearson's R column of original study Table 1.
+
+```{r pearsons-correlation}
+df <- sum(!is.na(acs_covid$dis_pct)) - 2
+
+pearsons_r <- acs_covid %>%
+  select(where(is.numeric)) %>%
+  st_drop_geometry() %>%
+  cor(method = "pearson", use = "everything") %>%
+  as.data.frame() %>%
+  select(r = covid_rate) %>%
+  mutate(
+    t = abs(r) / sqrt((1 - r^2) / (df)),
+    p = pt(t, df, lower.tail = FALSE)
+  ) %>%
+  round(3) %>%
+  rownames_to_column("variable") %>%
+  filter(variable != "covid_rate")
+
+pearsons_r %>%
+  kable(caption = "Reproduced Pearson's R",
+        align = "c") %>%
+  column_spec(2:4, width = "4em") %>%
+  kable_styling(full_width = FALSE)
+```
+
+Compare the reproduced Pearson's *r* correlation coefficients to the original study's Pearson's *r* correlation coefficients.
+Stars indicates the significance level with two stars for `p < 0.01` and one star for `p < 0.05`.
+Correlation difference `rp_r_diff` is calculated between the reproduction study `rp_r` and original study `or_r` as `rp_r_diff = rp_r - or_r` Direction difference `rp_dir_diff` is calculated as `(rp_r > 0) - (or_r > 0)`, giving `0` if both coefficients have the same direction, `1` if the reproduction is positive and the original is negative, and `-1` if the reproduction is negative but the original is positive.
+
+```{r compare-pearsons-correlation}
+# calculate number of significance stars at p < 0.01 and p < 0.05 levels.
+pearsons_r <- mutate(pearsons_r, rp_stars = as.numeric(as.character(cut(p,
+  breaks = c(-0.1, 0.01, 0.05, 1),
+  labels = c(2, 1, 0)
+))))
+
+# join reproduction coefficients to original study coefficients
+correlations <- table1 %>%
+  filter(variable != "covid_rate") %>%
+  select(variable, or_r = r, or_stars = stars) %>%
+  left_join(select(pearsons_r, variable, rp_r = r, rp_stars), by = "variable")
+
+# find difference between coefficient and stars
+correlations <- correlations %>%
+  bind_cols(rename_with(
+    correlations[, 4:5] - correlations[, 2:3],
+    ~ paste0(.x, "_diff")
+  ))
+
+# find coefficients with different directions
+correlations <- correlations %>% mutate(rp_dir_diff = (rp_r > 0) - (or_r > 0))
+
+correlations %>%
+  kable(caption = "Compare reproduced and original Pearson's R",
+        col.names = c("Variable", "R", "Sig. Level", "R", "Sig. Level", "R", "Sig. Level", "Direction"),
+        align = "c") %>%
+  kable_styling() %>%
+  add_header_above(c(" " = 1, "Original" = 2, "Reproduced" = 2, "Difference" = 3))
+```
+
+Reproduction correlation coefficients varied slightly from the original study coefficients by +/- 0.006.
+All but one Pearson's correlation coefficient was significant to the same level, and the exception was age 18 to 34.
+Counter-intuitively, the correlation coefficient was slightly closer to 0 but the *p* value was also found to be more significant, suggesting a difference in the estimation of *t* and/or *p*, or a typographical error.
+All of the coefficients had the same direction.
+
+**Unplanned Deviation for Reproduction**: We should expect identical results for this correlation test, so we loaded the original author's data from `Aug1GEEdata.csv` to re-test the statistic, calculated as `unplanned_r` below.
+
+```{r original-data-pearson-correlation}
+# load author-provided original data
+original_gee <- read.csv(here("data", "raw", "public", "chakraborty", "Aug1GEEdata.csv"))
+
+# calculate correlation coefficients using original data
+original_gee %>%
+  select(Incidence, PerDisable, starts_with("PD")) %>%
+  cor(method = "pearson", use = "everything") %>%
+  as.data.frame() %>%
+  rownames_to_column("or_variable") %>%
+  filter(or_variable != "Incidence") %>%
+  select(or_variable, unplanned_r = Incidence) %>%
+  bind_cols(correlations[, 1:2]) %>%
+  mutate(unplanned_r = round(unplanned_r, 3), diff = unplanned_r - or_r) %>%
+  select(variable, unplanned_r, or_r, diff) %>%
+  kable(caption = "Recalculation of Pearson's R with original data",
+        align = "c",
+        ) %>%
+  kable_styling(full_width = FALSE)
+```
+
+The author's original data produced coefficients identical to the original publication!
+Is it possible that the data values are correct but have been reassigned / transposed to different counties?
+
+*Unplanned Deviation for Reproduction*: Considering the precise bitwise reproduction of descriptive statistics and of correlation statistics from author-provided data, we decided to recalculate the COVID-19 incidence rate with author-provided case and population data for comparison to the author-provided incidence rate.
+
+```{r compare-incidence-rate}
+# recalculate Incidence Rate
+original_gee <- original_gee %>%
+  mutate(recalc_Incidence = round(Cases / Total_POP * 100000, 2))
+
+# compare recalculation to author-provided original data and print any counties
+# with inconsistent results
+original_gee %>%
+  filter(recalc_Incidence != Incidence) %>%
+  select(FIPS = COUNTY_FIPS, State = ST_Name, County = Countyname, Population = Total_POP, Cases, OR_Incidence = Incidence, RPr_Incidence = recalc_Incidence) %>%
+  mutate(Difference = RPr_Incidence - OR_Incidence) %>%
+  kable(caption = "Counties with inconsistent COVID-19 incidence rate") %>%
+  kable_styling(latex_options = "scale_down")
+```
+
+We found that 13 counties had incorrect COVID-19 incidence scores, and the scores seem to be transposed from other counties, such that the overall descriptive statistics were accurate but the correlation coefficients were inaccurate.
+This finding implies that subsequent analyses using the COVID-19 Incidence rate will be slightly different and more accurate in this reproduction study than in the original study.
+
+**Unplanned deviation for reproduction:** Join the original author's Incidence data into our reproduction data frame so that we can later test for sensitivity to this error.
+Then report any counties for which the reproduced COVID incidence rate differs from the original author's COVID incidence rate.
+
+```{r join-incidence-rate}
+original_incidence <- original_gee %>%
+  select(COUNTY_FIPS, or_incidence = Incidence) %>%
+  mutate(fips =
+           ifelse(COUNTY_FIPS >= 10000,
+                  as.character(COUNTY_FIPS),
+                  paste0("0", COUNTY_FIPS)
+                  )
+         )
+  # calculates a text version of FIPS code for joining, while adding back
+  # the leading '0' if the code was less than 10000
+
+acs_covid <- acs_covid %>%
+  left_join(original_incidence, by = "fips")
+
+rm(original_incidence)
+
+acs_covid %>%
+  st_drop_geometry %>%
+  filter(covid_rate != or_incidence) %>%
+  arrange(fips) %>%
+  select(county_st, covid_rate, or_incidence) %>%
+  kable(caption = "Original incidence rate joined to reproduction data") %>% kable_styling()
+```
+
+The join worked, highlighting the same 13 counties with inconsistent incidence rates.
+This also confirms that our reproduced dependent variable is identical to the original dependent variable with the exception of these three counties.
+
+## Bivariate nonparametric correlation analysis
+
+**Unplanned Deviation for Reproduction**: The dependent and independent variables in this study do not have normal distributions, as shown in the Shapiro-Wilk test results above.
+Therefore, we deviate from the original study to use the Spearman's Rho non-parametric correlation test.
+
+```{r spearmans correlation}
+df <- sum(!is.na(acs_covid$dis_pct)) - 2
+
+spearmans_rho <- acs_covid %>%
+  select(where(is.numeric)) %>%
+  st_drop_geometry() %>%
+  cor(method = "spearman", use = "everything") %>%
+  as.data.frame() %>%
+  select(rho = covid_rate) %>%
+  mutate(
+    t = abs(rho) / sqrt((1 - rho^2) / (df)),
+    p = pt(t, df, lower.tail = FALSE)
+  ) %>%
+  round(3) %>%
+  rownames_to_column("variable") %>%
+  filter(variable != "covid_rate")
+```
+
+Compare the Spearman's *rho* correlation coefficients to the reproduced Pearson's *r* correlation coefficients.
+Differences are calculated as *Spearman's Rho* - *Pearson's R*.
+
+```{r compare-spearmans-correlation}
+# calculate number of significance stars at p<0.01 and P<0.05 levels.
+spearmans_rho <- mutate(spearmans_rho, rp_rho_stars = as.numeric(as.character(cut(p,
+  breaks = c(-0.1, 0.01, 0.05, 1),
+  labels = c(2, 1, 0)
+))))
+
+correlations <- correlations[, 1:8] %>%
+  left_join(select(spearmans_rho, variable, rp_rho = rho, rp_rho_stars), by = "variable")
+
+corrdiff <- select(correlations, starts_with("rp_rho")) -
+  select(correlations, rp_r, rp_stars)
+
+correlations <- correlations %>% bind_cols(rename_with(corrdiff, ~ paste0(.x, "_diff")))
+rm(corrdiff)
+
+correlations <- correlations %>% mutate(rp_rho_dir_diff = (rp_rho > 0) - (rp_r > 0))
+
+correlations %>%
+  select(variable, rp_r, rp_stars, starts_with("rp_rho")) %>%
+  kable(col.names = c("Variable", "R", "Stars", "Rho", "Stars", "Rho - R", "Stars", "Direction"),
+        align = "c") %>%
+  #column_spec(2:6, width_min = "5em") %>%
+  kable_styling() %>%
+  add_header_above(c(" " = 1, "Pearson's" = 2, "Spearman's" = 2, "Difference" = 3))
+```
+
+Three variables change significance levels, with *Native American* and *Other* races gaining significance and *age 18-34* losing significance.
+Two correlations change direction, with both *Native American* race (illustrated in scatterplot below) and *Female* households switching from positive correlations to negative correlations.
+Instabilities between the parametric and non-parametic correlations arise from variables with very skewed distributions and/or weak correlations at the county level.
+Some difference may also be attributable to the 13 counties with data errors in the COVID-19 Incidence Rate.
+In such distributions, outlier observations have more weight in the parametric Person's R test than in the non-parametric Spearman's Rho test.
+
+```{r plot-bivariate, fig.width=4, fig.height=4}
+plot(acs_covid$native_pct,
+  acs_covid$covid_rate,
+  xlab = "Percent Native American",
+  ylab = "COVID-19 Incidence",
+  pch = 16,
+  col = rgb(0, 0, 0, 0.05),
+  cex.lab = 0.8,
+  cex.axis = 0.5,
+)
+lines(abline(lm(acs_covid$covid_rate ~ acs_covid$native_pct)))
+
+rm(spearmans_rho, pearsons_r, correlations, table1, df)
+```
+
+## Kulldorff spatial scan statistic
+
+Although there were no major geographic *transformations* in this study, *geographic grouping criteria* for the generalized estimating equation (GEE) models are defined as a combination of states and COVID-19 risk, which is based on the Kulldorff spatial scan statistic for geographic clusters of high COVID-19 incidence.
+The scan statistic in SaTScan used spherical great circle distance calculations based upon the latitude and longitude coordinates of the centroid of each county.
+For this purpose, we have used the `X` and `Y` attributes provided as geographic variables with ACS data.
+
+We use a Kulldorff spatial scan statistic to detect spatial clusters of high COVID-19 incidence (workflow step 6).
+The statistic uses a Monte Carlo simulation to calculate statistical significance, and therefore may not produce identical results each time.
+
+The original study uses SaTScan software to implement the Kulldorff spatial scan statistic model.
+In SaTScan, models may be specified with many parameters having significant implications for results.
+The original manuscript only specifies that Poisson model should be used.
+We can also intuit that the model is discrete (locations are stationary and non-random), and spatial only (there is no temporal dimension).
+The author-provided SaTScan results `SatScan_results.txt` contains additional parameters which appear to adhere closely to the software's default settings.
+These include the maximum cluster size of "50 percent of population at risk", and the "GINI optimized cluster collection" and "no geographical overlap" options for detecting secondary clusters.
+The "P-value Cutoff" for significant clusters option did not appear in the v9.6 output, suggesting that the software only allowed the default "no" option for this at the time of the original study.
+
+SaTScan software can also output two versions of geographic data:
+
+-   The `col` cluster polygon shapefile contains a circle for each cluster, where each polygon is a circle defined by the cluster center and radius. The attributes include a variable `REL_RISK` for cluster relative risk
+-   The `gis` location point shapefile contains one point for each county in a cluster. The attributes include variables `LOC_RR` for local relative risk and `CLU_RR` for cluster relative risk
+
+The SaTScan software implementation of the Kulldorff spatial scan statistic calculates two relative risk scores for locations:
+
+-   Cluster relative risk is the incidence rate of the population within the cluster divided by the incidence rate of the population outside of the cluster. This is calculated as `REL_RISK` in the `col` cluster polygon shapefile and as `CLU_RR` in the `gis` location point shapefile.
+-   Local relative risk is the incidence rate of population within a location divided by the incidence rate of the population outside of the location. This is calculated as `LOC_RR` in the `gis` location shapefile, and is not calculated in the `col` cluster polygon shapefile.
+
+For the purposes of interpreting the spatial scan statistic, a *location* is a *county centroid* while a *cluster* is a *collection of counties* with high incidence rates, defined in the shape of a circle with a *center* location (a county centroid) and a *radius*.
+
+The original study is not clear about using the cluster geographic data *vs* the location geographic data or the cluster relative risk *vs* local relative risk.
+However, The author-provided `SatScan_results.txt` results file indicates a geographic cluster file but no location file, and the author-provided `Aug1GEEdata.csv` data table contains a `REL_RISK` field but no `CLU_RR` field or `LOC_RR` field.
+This suggests that in the original study, the `col` polygon cluster shapefile and *cluster* relative risk were used to represent COVID-19 risk and define GEE clusters.
+
+The spatial scan statistic is based on case counts and total population, and is therefore unaffected by errors in the COVID Incidence rate.
+
+**Planned deviation for reproduction**: We opted to use the SpatialEpi package in R, selecting open source software with R integration over SatSCan software, which is free but not open.
+The Kulldorff spatial scan statistic model in SpatialEpi also supports a discrete Poisson spatial model, and uses the GINI coefficient to select secondary clusters with no geographical overlap that maximize the difference between locations inside of clusters and locations outside of clusters.
+We expected that this set of software options could reproduce identical results compared to SaTScan.
+
+First, calculate the Kulldorff spatial scan statistic using SpatialEpi.
+Optionally, skip this code block due to long run times of more than 10 minutes.
+
+```{r SpatialEpi-Kulldorff, eval = FALSE, fig.width=4, fig.height=4}
+start_time <- Sys.time()
+covid_geo <- covid_table %>%
+  select(x, y) %>%
+  latlong2grid()
+# latlong2grid creates approximate equidistant cylindrical grid
+# could probably reproject to epsg 5070 and create table with x and y
+
+# calculate expected cases with one strata
+expected.cases <- expected(covid_table$pop, covid_table$cases, 1)
+
+# Kulldorff spatial scan statistic
+covid_kulldorff <- kulldorff(
+  geo = covid_geo,
+  cases = covid_table$cases,
+  population = covid_table$pop,
+  expected.cases = expected.cases,
+  pop.upper.bound = 0.5,
+  n.simulations = 999,
+  alpha.level = 0.05,
+  plot = TRUE
+)
+
+print(
+  paste(
+    "Run time:",
+    round(difftime(Sys.time(), start_time, units = "mins"), 2),
+    "minutes"
+  ),
+  quote = FALSE
+)
+rm(covid_geo, expected.cases, start_time)
+
+# save results in a file appended with the current date
+saveRDS(covid_kulldorff,
+  file = here("data", "derived", "public", paste0("covid_kulldorff_", Sys.Date(), ".RDS"))
+)
+```
+
+Load pre-calculated Kulldorff spatial scan results.
+Alternatively, skip or modify this code block to use your own version of the SpatialEpi Kulldorff results.
+
+```{r load-Kulldorff}
+# load pre-calculated Kulldorff results
+# alternatively, modify the file name with an appended date to load a more current set of results
+covid_kulldorff <- readRDS(
+  here("data", "derived", "public", "covid_kulldorff_2025-03-07.RDS")
+)
+```
+
+Report Kulldorff spatial scan results.
+
+```{r report-Kulldorff}
+print("Most likely cluster:", quote = FALSE)
+covid_kulldorff$most.likely.cluster
+print(
+  paste0(
+    "Number of Secondary clusters: ",
+    length(covid_kulldorff$secondary.clusters)
+  ),
+  quote = FALSE
+)
+```
+
+The `SpatialEpi` implementation of Kulldorff spatial scan statistics provides output in the form of hierarchical lists analogous to the text output of SaTScan, but does not output a simple data frame or tabular output analogous to the shapefiles from SaTScan.
+Therefore, additional steps are required to append the Kulldorff scan results to the `acs_covid` simple features data frame.
+This can be done by assigning unique cluster ID's to each county within a cluster.
+Clusters include the county at the center of a cluster and all of the other counties within the cluster radius.
+Therefore, we use the FIPS code of the county at the center of each cluster as the unique cluster ID.
+
+
+```{r assign-cluster-IDs, message = FALSE}
+# list of primary cluster locations (counties)
+cluster_locations <- covid_kulldorff$most.likely.cluster$location.IDs.included
+
+# create data frame of clusters and
+# calculate the clusterID as the first (center) county FIPS code
+clusters <- covid_table[cluster_locations, "fips"] %>%
+  mutate(clusterID = covid_table[[cluster_locations[1], "fips"]],
+         likelihood = covid_kulldorff$most.likely.cluster$log.likelihood.ratio)
+
+# Get a list of secondary clusters
+secondary <- covid_kulldorff$secondary.clusters
+
+# similarly add counties in each secondary cluster to the list of clusters
+for (i in secondary) {
+  cluster_locations <- i$location.IDs.included
+  new_clusters <- covid_table[cluster_locations, "fips"] %>%
+    mutate(clusterID = covid_table[[cluster_locations[1], "fips"]],
+           likelihood = i$log.likelihood.ratio)
+  clusters <- clusters %>% rbind(new_clusters)
+}
+
+rm(cluster_locations, secondary, i, new_clusters)
+```
+
+### Map Kulldorff clusters
+
+**Unplanned deviation for reproduction**: The original study does not include visualizations of the spatial structure and distribution of COVID-19 clusters.
+
+First, we must join the Kulldorff spatial scan cluster IDs to the acs_covid simple features dataframe.
+Although this was planned in workflow step 9, the order of operations between steps 9 and steps 7 and 8 is not important.
+
+Next, calculate a new field `isCluster` to identify counties in COVID-19 clusters.
+Additionally, distinguish between counties defining the center of a cluster from counties constituting other parts of a cluster by comparing the cluster ID (equivalent to the center county's fips code) to the county fips code.
+
+```{r join-clusterID-to-acs_covid}
+acs_covid <- acs_covid %>%
+  left_join(clusters, by = "fips") %>%
+  mutate(isCluster = case_when(
+    clusterID == fips ~ "center of cluster",
+    !is.na(clusterID) ~ "other part of cluster",
+    .default = NA
+  ))
+```
+
+**Planned deviation for reproduction**: Map the `SpatialEpi` cluster results.
+
+
+```{r map-clusters}
+tm_spatialepi_clusters <-
+  tm_shape(state) +
+    tm_fill("gray98") +
+  tm_shape(acs_covid) +
+  tm_polygons(col = "isCluster",
+          fill.values = "-Oranges",
+          popup.vars = c("fips", "clusterID"),
+          values.na = NULL,
+          fill.legend = "SpatialEpi Kulldorff COVID-19 Clusters",
+          border.col = "white",
+          lwd = 0.2,
+          color.alpha = 0.2) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = 0.5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+tm_spatialepi_clusters
+```
+
+**Unplanned deviation for reproduction**: The `SpatialEpi` implementation of Kulldorff spatial scan statistics does not calculate local relative risk or cluster relative risk.
+Therefore, the next step is to calculate local and cluster relative risk (workflow step 7).
+
+```{r relative-risk}
+total_pop <- sum(acs_covid$pop)
+total_cases <- sum(acs_covid$cases)
+
+acs_covid <- acs_covid %>%
+  group_by(clusterID) %>%
+  mutate(
+    rr_cluster = ifelse(is.na(clusterID), NA,
+      (sum(cases) / sum(pop)) / ((total_cases - sum(cases)) / (total_pop - sum(pop)))
+    )
+  ) %>%
+  ungroup() %>%
+  mutate(
+    rr_loc = (cases / pop) / ((total_cases - cases) / (total_pop - pop))
+  )
+
+rm(total_pop, total_cases)
+```
+
+Classify relative risk on a scale from 1 to 6 (workflow step 8).
+Risk is classified according to this table:
+
+| Relative Risk Values | Relative Risk Class |
+|:--------------------:|:-------------------:|
+|  Outside of cluster  |          1          |
+|       RR \< 1        |          1          |
+|    1 \<= RR \< 2     |          2          |
+|    2 \<= RR \< 3     |          3          |
+|    3 \<= RR \< 4     |          4          |
+|    4 \<= RR \< 5     |          5          |
+|    5 \<= RR \< 6     |          6          |
+
+Counties falling outside of any cluster are assigned a score of 1.
+
+```{r classify-relative-risk}
+# class breaks
+breaks <- c(-Inf, 1, 2, 3, 4, 5, Inf)
+
+acs_covid <- acs_covid %>%
+  mutate(
+    cluster_class = ifelse(is.na(clusterID), 1, cut(rr_cluster, breaks, labels = FALSE)),
+    loc_class = cut(rr_loc, breaks, labels = FALSE)
+  )
+```
+
+### Map relative risk scores
+
+**Unplanned deviation for reproduction**: It would be helpful to visualize the spatial distributions of local relative risk classes and Kulldorff cluster relative risk classes in advance of using these classes to control for spatial heterogeneity in GEE models.
+
+First, map the spatial distribution of local relative risk score classifications.
+
+
+```{r map local relative risk score}
+# count the frequency of counties in each class and create labels
+class_freq <- acs_covid %>% st_drop_geometry() %>% count(loc_class)
+class_freq$qual <- ifelse(class_freq$n > 1, " counties", " county")
+class_freq[1, ]$qual <- paste(class_freq[1, ]$qual, "at low risk")
+class_freq[nrow(class_freq), ]$qual <- paste(class_freq[nrow(class_freq), ]$qual, "at high risk")
+class_freq$label <- paste0(class_freq$loc_class,
+                           " (",
+                           class_freq$n,
+                           class_freq$qual,
+                           ")")
+
+# Map Local Relative Risk scores
+tm_spatialepi_local_risk_class <- tm_shape(acs_covid) +
+  tm_polygons("loc_class",
+    title = "Local Relative Risk Class",
+    border.col = "white",
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "Oranges",
+    style = "cat",
+    labels = class_freq$label
+  ) +
+  tm_shape(state) +
+  tm_borders("grey", lwd = .5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+rm(class_freq)
+
+tm_spatialepi_local_risk_class
+```
+
+Next, map the cluster relative risk scores for comparison.
+Note that following the original study classification methodology, counties outside of clusters are assigned the lowest risk class of `1`.
+
+
+```{r map-cluster-relative-risk-classes}
+# count the frequency of counties in each class and create labels
+class_freq <- acs_covid %>% st_drop_geometry() %>% count(cluster_class)
+class_freq$qual <- ifelse(class_freq$n > 1, " counties", " county")
+class_freq[1, ]$qual <- paste(class_freq[1, ]$qual, "at low risk")
+class_freq[nrow(class_freq), ]$qual <- paste(class_freq[nrow(class_freq), ]$qual, "at high risk")
+class_freq$label <- paste0(class_freq$cluster_class,
+                           " (",
+                           class_freq$n,
+                           class_freq$qual,
+                           ")")
+
+# map cluster relative risk scores
+tm_spatialepi_cluster_risk_class <- tm_shape(acs_covid) +
+  tm_polygons("cluster_class",
+    title = "Cluster Relative Risk Class",
+    border.col = "white",
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "Oranges",
+    style = "cat",
+    labels = class_freq$label
+  ) +
+  tm_shape(state) +
+  tm_borders("grey", lwd = .5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+rm(class_freq)
+
+tm_spatialepi_cluster_risk_class
+```
+
+Comparing the cluster and local relative risk classifications for regions like the Southeast, it is apparent that some areas of high risk are represented with large clusters that have an averaging effect on the cluster-based relative risk score.
+This effect is more pronounced for clusters with low compactness (e.g. the Southeast cluster stretched over the "black belt" region from Louisiana and Arkansas to Georgia) than clusters with higher compactness (e.g. New York City) because the circular shape of clusters includes more low-risk counties.
+
+### Compare clusters
+
+The original study did not directly report any results from the Kulldorff spatial scan statistic.
+However, the Kulldorff cluster relative risk scores were combined with states to create clusters for GEE models, hereafter called "GEE clusters".
+The original study reported `102` unique GEE clusters having a range of `1` to `245` counties in each cluster.
+
+In order to compare results, we first create cluster IDs as combinations of the state ID and COVID relative risk class.
+The first clustering ID (State) and second clustering score (COVID relative risk class) were combined to form IDs for each unique combination of state and relative risk class.
+Then, we find the number of unique clusters and frequency counties per cluster in our reproduction study for comparison to the original study.
+
+```{r make-gee-clusters}
+# calculate clusters
+acs_covid <- acs_covid %>% mutate(
+  rp_clusID = as.integer(statefp) * 10 + cluster_class
+)
+
+# summarize clustering results
+cluster_summary <- acs_covid %>%
+  filter(cases > 0) %>%
+  st_drop_geometry() %>%
+  count(rp_clusID)
+cat(
+  length(cluster_summary$n),
+  "unique clusters based on spatialEpi CLUSTER relative risk\n"
+)
+summary(cluster_summary$n)
+rm(cluster_summary)
+```
+
+We failed to reproduce the same configuration of GEE clusters as the original study, finding 9 more clusters than the original study and a much smaller maximum cluster of 159 counties compared to 245 counties.
+
+### Reproduce Kulldorff spatial scan statistic in SaTScan
+
+**Unplanned deviation for reproduction**: Upon failing to reproduce an identical number of GEE clusters using SpatialEpi in R, we reproduced the procedure in the free but not open SaTScan software, using the current software version 10.1.
+The input data files (`case`, `Coordinates.geo`, and `Population.pop`), and output data files (`sat_scan_rpr.txt`, `sat_scan_rpr.col.shp`, and `sat_scan_rpr.gis.shp`) are found in the `data/derived/public/satscan` directory.
+The `sat_scan_rpr.txt` file reports the model parameters used in addition to results.
+
+Although it is not ideal to intercede with this unplanned deviation at this step, is the first step in the methodology following the Kulldorff spatial scan statistic with a result reported in the original publication.
+
+First, load and verify whether our SaTScan reproduction data compares to the author-provided SaTScan data.
+
+```{r load-satscan-col}
+# load author-provided data
+author_col <- read.dbf(here("data", "raw", "public", "chakraborty", "SatScan_output.dbf")) %>%
+  select(LOC_ID, or_rel_risk = REL_RISK)
+
+# load SaTScan reproduced data
+satscan_rpr_col <- read_sf(here("data", "derived", "public", "satscan", "sat_scan_rpr.col.shp"))
+
+# how many observations?
+cat(
+  nrow(satscan_rpr_col),
+  " reproduced relative risk observations\n",
+  nrow(author_col),
+  " author-provided relative risk observations\n",
+  sep = ""
+)
+
+# join and compare how many observations are identical?
+cat(
+  satscan_rpr_col %>%
+  full_join(author_col, by = "LOC_ID") %>%
+  filter(REL_RISK == or_rel_risk & REL_RISK > 0) %>%
+  nrow(),
+  "reproduced relative risk values match the original author's relative risk values"
+  )
+
+rm(author_col)
+```
+
+Our SaTScan results exactly reproduced the author-provided SaTScan results data.
+
+#### Map SaTScan spatial clusters
+
+Join the SaTScan results to `acs_covid` for mapping and analysis.
+
+```{r join-satscan-to-acs-covid}
+# check if there are any duplicated counties
+cat("Joining",
+    length(satscan_rpr_col$LOC_ID),
+    "records with",
+    length(unique(satscan_rpr_col$LOC_ID)),
+    "unique LOC_ID county values")
+
+# select important non-geographic columns
+satscan_rpr_col_t <- satscan_rpr_col %>%
+  st_drop_geometry() %>%
+  select(fips = LOC_ID, GINI_CLUST, REL_RISK)
+
+# join
+acs_covid <- acs_covid[, 1:which(colnames(acs_covid) == "rp_clusID")] %>%
+  left_join(satscan_rpr_col_t, by = "fips")
+
+rm(satscan_rpr_col_t)
+```
+
+**Unplanned deviation for reproduction**: Visualize the spatial distribution of the author-provided Kulldorff COVID-19 Clusters.
+
+```{r map--author-clusters}
+# count frequencies of each cluster type
+clus_counts <- satscan_rpr_col %>%
+  st_drop_geometry() %>%
+  group_by(GINI_CLUST) %>%
+  summarize(n = n())
+
+# create labels including frequencies in brackets
+clus_labels <- c(paste0("Hierarchical (", clus_counts[1,2], ")"),
+            paste0("GINI Optimized (", clus_counts[2,2], ")"))
+
+# for clusters with only one county, erase the number of counties
+satscan_rpr_col[which(satscan_rpr_col$NUMBER_LOC < 3), ]$NUMBER_LOC <- NA
+
+gini_circle <- satscan_rpr_col %>% filter(GINI_CLUST == 'T')
+hier_circle <- satscan_rpr_col %>% filter(GINI_CLUST == 'F')
+
+tm_author_clusters <-
+  tm_shape(state) +
+    tm_fill("gray98") +
+  tm_shape(acs_covid) +
+  tm_polygons(col = "GINI_CLUST",
+              fill.scale = clus_labels,
+              border.col = "white",
+              lwd = 0.5,
+              fill.values = c("tomato", "thistle3"),
+              popup.vars = c("fips", "clusterID"),
+              value.na = NULL,
+              title = "SaTScan Kulldorff COVID-19 Clusters\nCluster Centers") +
+  tm_shape(state) +
+    tm_borders("grey", lwd = 0.5) +
+  tm_shape(gini_circle) +
+    tm_borders(col = "thistle4") +
+    tm_text("NUMBER_LOC", size = 0.5) +
+  tm_shape(hier_circle) +
+    tm_borders(col = "tomato") +
+    tm_text("NUMBER_LOC", size = 0.5, ymod = 0.4) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  ) +
+  tm_add_legend('symbol',
+              	col = NA,
+              	border.col = c("tomato", "thistle4"),
+              	size = 0.7,
+              	labels = clus_labels,
+              	title="Cluster Extents")
+
+tm_author_clusters
+
+rm(gini_circle, hier_circle, clus_counts, clus_labels)
+```
+
+In the map above, clusters containing only one county have no visible circle.
+Clusters containing two counties are encircled, but have no label.
+Clusters containing three or more counties are encircled and labelled with the number of counties.
+
+Note that this version of data only includes the 96 counties defining cluster centers, visualized with fill colors above.
+The data excludes all of the non-center counties in clusters with more than one county.
+The extent of these larger clusters is visualized by unfilled circles defined by cluster radii.
+
+Additionally, the SaTScan software confusingly merges two sets of clusters in the results when the user uses the (default) option for GINI-optimized clusters.
+One set of results is a hierarchical non-overlapping set of clusters.
+These clusters are noted with `GINI_CLUST = F` in the results.
+The second set of results is a set of hierarchical non-overlapping clusters designed to maximize the GINI coefficient of inequality between counties within clusters and counties outside of clusters.
+These clusters are noted with `GINI_CLUST = T` in the results.
+
+Merged together as they are, the two sets of secondary clusters overlap one another geographically, causing ambiguity in terms of which cluster-based relative risk score should be used at each location.
+
+**Unplanned deviation for reproduction**: Can we also use these reproduced SaTScan results to exactly reproduce the author-reported frequency of original GEE classes and maximum counties per class?
+If the results match, it will confirm that the problems identified above have propagated through the original study analysis.
+
+```{r reproduce-gee-clusters}
+acs_covid <- acs_covid %>%
+  mutate(
+    ss_cluster_class = ifelse(is.na(REL_RISK), 1, cut(REL_RISK, breaks, labels = FALSE)),
+    ss_clusID = as.integer(statefp) * 10 + ss_cluster_class
+  )
+
+cluster_summary <- acs_covid %>%
+  filter(cases > 0) %>%
+  st_drop_geometry() %>%
+  count(ss_clusID)
+cat(
+  length(cluster_summary$n),
+  "unique clusters based on spatialEpi CLUSTER relative risk\n"
+)
+summary(cluster_summary$n)
+```
+
+Using SaTScan Kulldorff clusters, we have exactly reproduced the author-reported frequency of original GEE classes and maximum counties per class.
+We have confirmed that the original study used the *cluster relative risk* of the *center county* of each cluster, including both the *hierarchical* and *GINI-optimized* sets of clusters.
+
+#### Compare SaTScan clusters to SpatialEpi clusters
+
+**Unplanned Deviation for Reanalysis:** At this point it is clear that the best decision will be to shift from a *reproduction* study to a *reanalysis* study, intentionally altering methodological decisions to achieve a more valid outcome.
+We prefer to include *all counties* contained in each cluster, and to use only *one set of non-overlapping clusters*, as produced by the `SpatialEpi` algorithm.
+
+Given the shifting goal, how sensitive is this study to the choice of computational environment for the Kulldorff scan statistics?
+To answer this question, we must load the local SaTSCan results inclusive of all counties within clusters, filter the results to focus on the standard hierarchical set of clusters, and compare the spatial distributions of the SaTScan and SpatialEpi results.
+
+```{r join-satscan-clusters-all-counties, message = F}
+# load local SaTScan reproduced data
+satscan_rpr_gis_t <- read_sf(
+  here("data", "derived", "public", "satscan", "sat_scan_rpr.gis.shp")
+) %>%
+  st_drop_geometry() %>%
+  select(fips = LOC_ID, CLU_RR, GINI_CLUST)
+
+# check if there are any duplicated counties
+cat("SaTScan combined GIS output has",
+    length(satscan_rpr_gis_t$fips),
+    "records with",
+    length(unique(satscan_rpr_gis_t$fips)),
+    "unique county values\n")
+
+satscan_rpr_gini <- satscan_rpr_gis_t %>% filter(GINI_CLUST == "T") %>% select(fips, gini_rr = CLU_RR)
+satscan_rpr_hier <- satscan_rpr_gis_t %>% filter(GINI_CLUST == "F") %>% select(fips, hier_rr = CLU_RR)
+
+# check if there are any duplicated counties
+cat("SaTScan Hierarchical clusters include",
+    length(satscan_rpr_hier$fips),
+    "records with",
+    length(unique(satscan_rpr_hier$fips)),
+    "unique county values\n")
+
+cat("SaTScan GINI-optimized clusters include",
+    length(satscan_rpr_gini$fips),
+    "records with",
+    length(unique(satscan_rpr_gini$fips)),
+    "unique county values")
+
+acs_covid <- acs_covid[, 1:which(colnames(acs_covid) == "ss_clusID")] %>%
+  left_join(satscan_rpr_gini, by = "fips") %>%
+  left_join(satscan_rpr_hier, by = "fips")
+
+rm(satscan_rpr_gis_t, satscan_rpr_gini, satscan_rpr_hier)
+```
+
+It was necessary to divide the Hierarchical clusters from the GINI clusters to avoid duplicates and geographic overlap.
+
+Compare the SaTScan Hierarchical clusters to the SpatialEpi clusters.
+
+```{r hierarchical-cluster-comparison-map, message = F}
+hier_clusters <- acs_covid %>%
+  mutate(xcluster = case_when(
+    !is.na(hier_rr) & is.na(isCluster) ~ "SaTScan Hierarchical only",
+    !is.na(hier_rr) & !is.na(isCluster) ~ "Both SaTScan and SpatialEpi",
+    is.na(hier_rr) & !is.na(isCluster) ~ "SpatialEpi only",
+    .default = NA
+  )) %>%
+  filter(!is.na(xcluster)) %>%
+  group_by(xcluster) %>%
+  mutate(xn = n()) %>%
+  ungroup() %>%
+  mutate(xcluster = paste0(xcluster, " (", xn, " counties)"))
+
+tm_spatialepi_hier <-
+  tm_shape(state) +
+  tm_fill("gray98") +
+  tm_shape(hier_clusters) +
+  tm_polygons(
+    col = "xcluster",
+    palette = c("wheat", "tomato", "thistle3"),
+    fill.values = NULL,
+    title = "SaTScan Hierarchical and SpatialEpi Clusters",
+    border.col = "white",
+    lwd = 0.2,
+    border.alpha = 0.3
+  ) +
+  tm_shape(state) +
+  tm_borders("grey", lwd = 0.5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+tm_spatialepi_hier
+
+rm(hier_clusters)
+```
+
+The two methods only agree on the definition of the largest clusters in distant regions.
+Thereafter, SpatialEpi detects many secondary clusters in the vicinity of the largest ones, while SaTScan detects seven isolated and low-probability counties.
+
+Compare the SaTScan GINI Optimized clusters to the SpatialEpi clusters.
+
+```{r gini-cluster-comparison-map, message = F}
+gini_clusters <- acs_covid %>%
+  mutate(xcluster = case_when(
+    !is.na(gini_rr) & is.na(isCluster) ~ "SaTScan GINI optimized only",
+    !is.na(gini_rr) & !is.na(isCluster) ~ "Both SaTScan and SpatialEpi",
+    is.na(gini_rr) & !is.na(isCluster) ~ "SpatialEpi only",
+    .default = NA
+  )) %>%
+  filter(!is.na(xcluster)) %>%
+  group_by(xcluster) %>%
+  mutate(xn = n()) %>%
+  ungroup() %>%
+  mutate(xcluster = paste0(xcluster, " (", xn, " counties)"))
+
+tm_spatialepi_gini <-
+  tm_shape(state) +
+  tm_fill("gray98") +
+  tm_shape(gini_clusters) +
+  tm_polygons(
+    col = "xcluster",
+    fill.values = c("wheat", "tomato", "thistle3"),
+    values.na = NULL,
+    title = "SaTScan GINI Optimized and SpatialEpi Clusters",
+    border.col = "white",
+    lwd = 0.2,
+    border.alpha = 0.3
+  ) +
+  tm_shape(state) +
+  tm_borders("grey", lwd = 0.5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5
+  )
+
+tm_spatialepi_gini
+
+rm(gini_clusters)
+```
+
+There is more agreement overall between SpatialEpi and SaTScan GINI Optimized clusters.
+The two algorithms agree the most for smaller and less significant clusters above the 95% confidence threshold.
+Because the SaTScan clusters are more limited in size, SaTScan detects several smaller clusters with gaps in place of the largest SpatialEpi clusters.
+
+Keeping in mind that the final analysis uses a classification of cluster relative risk for GEE models, are there important differences between the two results with regard to classification of risk?
+We can check by calculating cluster relative risk classes based on the SaTScan GINI clusters, and cross-tabulating with the SpatialEpi risk classes.
+
+```{r compare-spatialepi-satscan}
+acs_covid <- acs_covid %>%
+  mutate(
+    gini_class = ifelse(is.na(gini_rr), 1, cut(gini_rr, breaks, labels = FALSE)),
+    gini_clusID = as.integer(statefp) * 10 + gini_class
+  )
+
+table(acs_covid$cluster_class, acs_covid$gini_class) %>%
+  kable(row.names = TRUE, caption = "COVID-19 Risk Class by County", align = "c") %>%
+  column_spec(2:7, width = "3em") %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(2, bold = TRUE) %>%
+  add_header_above(c("SpatialEpi" = 1, "SatScan" = 6)) %>%
+  kable_styling(full_width = FALSE, row_label_position = "c")
+```
+
+Indeed, SpatialEpi has identified more than 300 counties with above normal risk that were not identified by SaTScan.
+Meanwhile, SaTScan identified 78 counties with above normal risk that were not identified by SpatialEpi.
+
+The maps and crosstabulation above indicate that there are important differences between the SaTScan and SpatialEpi computational environments for calculating secondary clusters.
+
+We summarize our understanding of the computational differences for default settings below, based on close examination of our software outputs, technical documentation for SaTScan, and the documentation and code repository for SpatialEpi.
+
+|                          |      SaTScan Hierarchical      |            SaTScan GINI            |                  SpatialEpi                  |
+|:----------------:|:----------------:|:----------------:|:----------------:|
+|     possible shapes      |  circle (default) or ellipse   |    circle (default) or ellipse     |                    circle                    |
+| possible cluster centers | locations with rates \> normal |   locations with rates \> normal   |                all locations                 |
+|   maximum cluster size   |          50% of cases          | varies, not exceeding 50% of cases |              50% of population               |
+|  maximum *p* of cluster  |              1.00              |                1.00                |                     0.05                     |
+|         distance         |     spherical great circle     |       spherical great circle       | spherical equidistant cylindrical projection |
+
+To further interrogate the differences in sets of secondary clusters, we must understand that theoretically each location (county), may be the center of many different circular clusters defined by different radii, starting with a radius of 0 and the one county at the center, and expanding until the maximum cluster size is reached.
 
 # Results
 
-Describe how results are to be presented.
+Comparison of the results from SaTScan and `SpatialEpi` Kulldorf analyses show that the two methods were similar, with the large majority of RR classes overlapping. Most values that did not map directly were only one class away (mostly just between risk classes 1 and 2). Analysis of the overlaid map shows that the Kulldorf analysis using `SpatialEpi` yielded larger contiguous risk areas, particularly in Florida, southern California and the southwest, and in southern Texas. SatScan yeilded more risk clusters in the northeast, northern Texas, and the four corners region.
 
 # Discussion
 
-Describe how the results are to be interpreted *vis a vis* each hypothesis or research question.
+Results can be interpreted in two ways. First, results from the Kulldorf spatial scan can be compared to the SaTScan results loaded in as a representation of the original study methods and result. If these two figures are similar, it indicates that the reproducible code using the `SpatialEpi` package that generated the figures is accurate in reproducing the study. Secondly, given our hypothesis surrounding possible clustering along urban cooridors, a result in which Kulldorf results show more clustered clusters would indicate support for the hypothesis.
+
+Results indicated that the two methods were similar enough to succesfully reproduce the study. Additionally, they support the hypothesis predicting that `SpatialEpi` would better predict clustered urban areas.
+
+Having an open-source version of the study that determines links between disability, social vulnerability, and relative risk could be an incredibly useful tool in future epidemiological applications. As the frequency of epidemics and pandemics increases and social vulnerability categories become increasingly enshrined, methods like these could be critical to quickly identify at-risk groups and respond earlier to serious challenges.
 
 # Integrity Statement
 
-Include an integrity statement - The authors of this preregistration state that they completed this preregistration to the best of their knowledge and that no other preregistration exists pertaining to the same hypotheses and research.
-If a prior registration *does* exist, explain the rationale for revising the registration here.
+The authors of this preregistration state that they completed this preregistration to the best of their knowledge and that no other preregistration exists pertaining to the same hypotheses and research.
 
 # Acknowledgements
-
-- `Funding Name`: name of funding for the project
-- `Funding Title`: title of project grant
-- `Award info URI`: web address for award information
-- `Award number`: award number
 
 This report is based upon the template for Reproducible and Replicable Research in Human-Environment and Geographical Sciences, DOI:[10.17605/OSF.IO/W29MQ](https://doi.org/10.17605/OSF.IO/W29MQ)
 
 # References
+
+> Reproduction of Chakraborty 2021: An intracategorical analysis of COVID-19 and people with disabilities
+> Joseph Holler, Junyi Zhou, Peter Kedron, Drew An-Pham, Derrick Burt
+> Version 2.0 | First Created July 7, 2021
+> Updated June 26, 2023
+> https://github.com/josephholler/RPr-Chakraborty-2021
